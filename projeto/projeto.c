@@ -1,7 +1,10 @@
 //mudar tudo para mesmo tipo, pois todos vao se apontar entre si
-
+//esse é um rascunho de um site ("https://www.geeksforgeeks.org/thresholding-based-image-segmentation/") que tentei implementar só de teoria num downtime que tive
+//a variável "x" que não está definida significa uma margem de mudança entre o limiar i e i+1, a ideia daqueles laços é chegar no vale que haviamos dito
+//só não tenho noção do que seria um delta bom para usarmos, podemos implementar um dia desses
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 typedef struct Celula Celula;
 typedef struct Cabeca Cabeca;
@@ -180,10 +183,11 @@ void carregarImagem(char arquivo[], Cabeca* cabeca, int* nPixels, int* histogram
 
 	char formato[2];
 	int nlinhas, ncolunas;
-	*nPixels = nlinhas*ncolunas;
+	
 
 	fscanf(imagem, "%s %d %d", formato, &nlinhas, &ncolunas);
 
+    *nPixels = nlinhas * ncolunas;
     int pixel = 0;
 
     Celula* celula = NULL;
@@ -203,7 +207,7 @@ void carregarImagem(char arquivo[], Cabeca* cabeca, int* nPixels, int* histogram
 		for (int j = 0; j < ncolunas; ++j){
 			
 			fscanf(imagem, "%d", &pixel);
-			(*(histograma+pixel))++;
+			histograma[pixel]++;
 			printf("testeeee %d\n", histograma[pixel]);
 			if(pixel != 255) {
 
@@ -216,14 +220,33 @@ void carregarImagem(char arquivo[], Cabeca* cabeca, int* nPixels, int* histogram
 
 float calcularLimiar(int* histograma, int nPixels) {
 
-	float limiar = 0;
+	float limiar = 0,auxlim1 = 0,auxlim2 = 0,limiarNovo;
+	int count1,count2;
 
 	for (int i = 0; i < 256; ++i) {
 		
 		limiar = (histograma[i]*i) + limiar;	
 	}
 
+while ((limiarNovo - limiar) > x) 
+{
 	limiar = limiar / nPixels;
+	count1 = 0;
+	for (int i = 0; i < ceil(limiar); ++i) {
+		auxlim1 = histograma[i]*i + auxlim1;
+		count1++;
+	}
+	auxlim1 = auxlim1/count1;
+
+	count2 = 0;
+	for (int i = floor(limiar); i < 256; i++){
+		auxlim2 = histograma[i]*i + auxlim2;
+		count2++;
+	}
+	auxlim2 = auxlim2/count2;
+	
+	limiarNovo = (auxlim2 + auxlim1)/2;
+}
 
 	return limiar;
 }
